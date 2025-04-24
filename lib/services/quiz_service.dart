@@ -1,57 +1,46 @@
-import 'package:mongo_dart/mongo_dart.dart' as mongo;
+import 'dart:convert';
 import 'package:myapp/models/question.dart';
+import 'package:http/http.dart' as http;
 
 class QuizService {
-  final String _connectionString = 'mongodb+srv://hboubaker59:aSMsAY9OApz0hjcM@apps.tkxquq8.mongodb.net/quiz_app?retryWrites=true&w=majority';
+  final String _baseUrl = 'http://localhost:3000';
 
   Future<List<Question>> fetchQuestions() async {
-    final db = await mongo.Db.create(_connectionString);
+    final url = Uri.parse('$_baseUrl/questions');
     try {
-      print("1. Opening database connection...");
-      await db.open();
-      print("2. Database connection opened.");
-
-      final questionsCollection = db.collection('questions');
-      print("3. Accessed 'questions' collection.");
-
-      final questions = await questionsCollection.find().toList();
-      print("4. Fetched questions: $questions");
-
-      List<Question> list = questions
-              .map((e) => Question.fromJson({
-                    'question': e['question'],
-                    'options': List<String>.from(e['options']),
-                    'answer': e['answer']
-                  }))
-              .toList();
-      print("5. Converted to Question objects: $list");
-      return list;
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> questionsJson = json.decode(response.body);
+        List<Question> list = questionsJson
+            .map((questionJson) => Question.fromJson({
+                  'question': questionJson['question'],
+                  'options': List<String>.from(questionJson['options']),
+                  'answer': questionJson['answer'],
+                }))
+            .toList();
+        return list;
+      } else {
+        print(
+            'Failed to load questions. Status code: ${response.statusCode}');
+        return [];
+      }
     } catch (e) {
-      print('Error connecting to MongoDB: $e');
+      print('Error fetching questions: $e');
       return [];
-    } finally {
-      print("6. Closing database connection.");
-      await db.close();
     }
   }
 
   Future<void> sendResult(String playerName, int score) async {
-    final db = await mongo.Db.create(_connectionString);
+    final url = Uri.parse('$_baseUrl/results');
     try {
-      await db.open();
-
-      final resultsCollection = db.collection('results');
-
-      await resultsCollection.insertOne({
-        'joueur': playerName,
-        'score': score,
-        'date': DateTime.now().toIso8601String(),
-      });
-      print("result stored correctly");
+      final response = await http.post(url,
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({'joueur': playerName, 'score': score}));
+      if (response.statusCode == 200) {
+        print('Result sent successfully');
+      }
     } catch (e) {
-      print('Error connecting to MongoDB: $e');
-    } finally {
-      await db.close();
+      print('Error sending result: $e');
     }
   }
 }
