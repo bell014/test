@@ -18,7 +18,7 @@ class _ResultScreenState extends State<ResultScreen> {
   Future<void> sendResult() async {
     try {
       final response = await http.post(
-        Uri.parse('https://flutter-quiz-app-production.up.railway.app/storeResult'),
+        Uri.parse('http://localhost:3000/storeResult'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

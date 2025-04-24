@@ -19,7 +19,7 @@ class Question {
 }
 
 Future<List<Question>> fetchQuestions() async {
-  final response = await http.get(Uri.parse('https://flutter-quiz-app-production.up.railway.app/getQuestions'));
+  final response = await http.get(Uri.parse('http://localhost:3000/getQuestions'));
 
   if (response.statusCode == 200) {
     List<dynamic> body = jsonDecode(response.body);

@@ -2,9 +2,10 @@ require('dotenv').config(); // Load environment variables from .env file
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
+
 const app = express();
-const port = process.env.PORT || 3000; // Use the port provided by the hosting platform or default to 3000
-const uri = process.env.MONGODB_URI;
+const port = 3000; 
+const uri = process.env.MONGODB_URI; 
 if (!uri) {
   console.error('MONGODB_URI environment variable is not set!');
   process.exit(1); // Exit with an error code
@@ -12,27 +13,16 @@ if (!uri) {
 const client = new MongoClient(uri);
 app.use(cors());
 app.use(express.json()); // Add this line to parse JSON request bodies
-async function connectToDatabase() {
-  try {
-    await client.connect();
-    console.log("Connected successfully to MongoDB");
-  } catch (err) {
-    console.error("Error connecting to MongoDB:", err);
-    throw err;
-  }
-}
-app.use(cors());
-app.use(express.json());
 
 async function connectToDatabase() {
   try {
     await client.connect();
     console.log("Connected successfully to MongoDB");
-  } catch (err) {
+  } catch (err) { 
     console.error("Error connecting to MongoDB:", err);
     throw err;
-  }
-}
+  } 
+} 
 
 app.post('/storeResult', async (req, res) => {
   try {
