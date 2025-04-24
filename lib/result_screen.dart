@@ -16,17 +16,29 @@ class ResultScreen extends StatefulWidget {
 
 class _ResultScreenState extends State<ResultScreen> {
   Future<void> sendResult() async {
-    final response = await http.post(
-      Uri.parse('http://localhost:3000/storeResult'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'joueur': widget.playerName,
-        'score': widget.score,
-        'date': DateTime.now().toIso8601String(),
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('https://flutter-quiz-app-production.up.railway.app/storeResult'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'joueur': widget.playerName,
+          'score': widget.score,
+          'date': DateTime.now().toIso8601String(),
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        print("result stored correctly");
+      }
+      else {
+        print("error in storing result");
+      }
+    }
+    catch (error){
+      print("error: $error");
+    }
   }
 
   @override

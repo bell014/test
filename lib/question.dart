@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:http/http.dart' as http;
+
 
 class Question {
   final String question;
@@ -18,15 +19,15 @@ class Question {
 }
 
 Future<List<Question>> fetchQuestions() async {
-  try {
-    final String response = await rootBundle.loadString('questions.json');
-    final data = json.decode(response) as List<dynamic>;
-    return data.map((item) => Question.fromJson(item)).toList();
-  } catch (e) {
-    // Handle errors here, like logging or showing an error message
-    print('Error fetching questions: $e');
-    // You might want to return an empty list or throw an error
-    return []; // Returning an empty list to avoid crashing
+  final response = await http.get(Uri.parse('https://flutter-quiz-app-production.up.railway.app/getQuestions'));
+
+  if (response.statusCode == 200) {
+    List<dynamic> body = jsonDecode(response.body);
+    List<Question> questions = body.map((dynamic item) => Question.fromJson(
+        item)).toList();
+    return questions;
+  } else {
+    throw Exception('Failed to load questions');
   }
 }
 
