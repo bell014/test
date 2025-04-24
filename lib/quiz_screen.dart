@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/result_screen.dart';
-import 'package:http/http.dart' as http;
 import 'package:myapp/question.dart'; // Import the Question class
 
 // Import the Question class
@@ -22,7 +21,7 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   void initState() {
     super.initState();
-    futureQuestions = fetchQuestions();
+    futureQuestions = fetchQuestionsFromMongo();
   }
 
   @override

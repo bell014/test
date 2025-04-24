@@ -1,5 +1,4 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:mongo_dart/mongo_dart.dart';
 
 
 class Question {
@@ -10,26 +9,35 @@ class Question {
   Question({required this.question, required this.options, required this.answer});
 
   factory Question.fromJson(Map<String, dynamic> json) {
-    return Question(
-      question: json['question'] as String,
-      options: List<String>.from(json['options']),
-      answer: json['answer'] as int,
+      return Question(
+        question: json['question'] as String,
+        options: List<String>.from(json['options']),
+        answer: json['answer'] as int,
+      );
+  }
+}
+
+Future<List<Question>> fetchQuestionsFromMongo() async {
+    // Connection string
+    final db = await Db.create(
+      'mongodb+srv://hboubaker59:aSMsAY9OApz0hjcM@apps.tkxquq8.mongodb.net/quiz_app?retryWrites=true&w=majority',
     );
-  }
-}
 
-Future<List<Question>> fetchQuestions() async {
-  final response = await http.get(Uri.parse('http://localhost:3000/getQuestions'));
-
-  if (response.statusCode == 200) {
-    List<dynamic> body = jsonDecode(response.body);
-    List<Question> questions = body.map((dynamic item) => Question.fromJson(
-        item)).toList();
-    return questions;
-  } else {
-    throw Exception('Failed to load questions');
+    try {
+      // Open connection
+      await db.open();
+      // Access collection 'questions'
+      final questionsCollection = db.collection('questions');
+      // Fetch all documents
+      final questions = await questionsCollection.find().toList();
+      return questions.map((e) => Question.fromJson(e)).toList();
+    } catch (e) {
+      print('Error connecting to MongoDB: $e');
+      return [];
+    } finally {
+      await db.close();
+    }
   }
-}
 
 
 

@@ -1,9 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:myapp/quiz_screen.dart';
-import 'package:http/http.dart' as http;
-
+import 'package:mongo_dart/mongo_dart.dart';
+import 'package:flutter/foundation.dart';
 class ResultScreen extends StatefulWidget {
   final String playerName;
   final int score;
@@ -15,31 +13,28 @@ class ResultScreen extends StatefulWidget {
 }
 
 class _ResultScreenState extends State<ResultScreen> {
-  Future<void> sendResult() async {
-    try {
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/storeResult'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, dynamic>{
-          'joueur': widget.playerName,
-          'score': widget.score,
-          'date': DateTime.now().toIso8601String(),
-        }),
-      );
+    Future<void> sendResult() async {
+        final db = await Db.create(
+          'mongodb+srv://hboubaker59:aSMsAY9OApz0hjcM@apps.tkxquq8.mongodb.net/quiz_app?retryWrites=true&w=majority',
+        );
+        try {
+          await db.open();
 
-      if (response.statusCode == 201) {
-        print("result stored correctly");
+          final resultsCollection = db.collection('results');
+
+          await resultsCollection.insertOne({
+            'joueur': widget.playerName,
+            'score': widget.score,
+            'date': DateTime.now().toIso8601String(),
+          });
+          print("result stored correctly");
+
+        } catch (e) {
+          print('Error connecting to MongoDB: $e');
+        } finally {
+          await db.close();
+        }
       }
-      else {
-        print("error in storing result");
-      }
-    }
-    catch (error){
-      print("error: $error");
-    }
-  }
 
   @override
   @override
