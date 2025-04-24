@@ -31,7 +31,16 @@ app.get('/questions', async (req, res) => {
   try {
     const db = client.db('quiz_app');
     const questions = await db.collection('questions').find({}).toArray();
-    res.json(questions);
+    const questionsWithIndex = questions.map((question) => {
+      const answerIndex = question.options.indexOf(question.answer);
+      return {
+        ...question,
+        answer: answerIndex,
+      };
+    });
+
+    res.json(questionsWithIndex);
+
   } catch (err) {
     console.error('Error fetching questions', err);
     res.status(500).json({ message: 'Error fetching questions' });

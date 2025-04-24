@@ -28,53 +28,57 @@ class _QuizScreenState extends State<QuizScreen> {
       appBar: AppBar(
         title: const Text('Quiz'),
       ),
-      body: quizViewModel.questions.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : Consumer<QuizViewModel>(
-              builder: (context, viewModel, child) {
-                Question currentQuestion = viewModel.questions[viewModel.currentQuestionIndex];
+      body: Builder(
+          builder: (context) {
+        if (quizViewModel.questions.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        } else {
+          return Consumer<QuizViewModel>(builder: (context, viewModel, child) {
+            Question currentQuestion =
+                viewModel.questions[viewModel.currentQuestionIndex];
 
-                return SafeArea(
-                  child: Center(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              currentQuestion.question,
-                              style: const TextStyle(fontSize: 20),
-                            ),
+            return SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          currentQuestion.question,
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                      ),
+                      ...currentQuestion.options.map((option) {
+                        int optionIndex =
+                            currentQuestion.options.indexOf(option);
+                        Color? tileColor;
+
+                        if (viewModel.selectedAnswerIndex == optionIndex) {
+                          if (viewModel.answerChecked) {
+                            tileColor = optionIndex == currentQuestion.answer
+                                ? Colors.green
+                                : Colors.red;
+                          } else {
+                            tileColor = Colors.blue[200];
+                          }
+                        } else {
+                          tileColor = Colors.white;
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListTile(
+                            tileColor: tileColor,
+                            title: Text(option),
+                            onTap: () {
+                              viewModel.selectAnswer(optionIndex);
+                            },
                           ),
-                          ...currentQuestion.options.map((option) {
-                            int optionIndex = currentQuestion.options.indexOf(option);
-                            Color? tileColor;
-
-                            if (viewModel.selectedAnswerIndex == optionIndex) {
-                              if (viewModel.answerChecked) {
-                                tileColor = optionIndex == currentQuestion.answer
-                                    ? Colors.green
-                                    : Colors.red;
-                              } else {
-                                tileColor = Colors.blue[200];
-                              }
-                            } else {
-                              tileColor = Colors.white;
-                            }
-
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ListTile(
-                                tileColor: tileColor,
-                                title: Text(option),
-                                onTap: () {
-                                  viewModel.selectAnswer(optionIndex);
-                                },
-                              ),
-                            );
-                          }).toList(),
-                          Center(
+                        );
+                      }).toList(),
+                      Center(
                             child: ElevatedButton(
                               onPressed: () {
                                 if (!viewModel.answerChecked) {
@@ -102,13 +106,15 @@ class _QuizScreenState extends State<QuizScreen> {
                                   : "Check"),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+              ),
+            );
+          });
+        }
+      }),
     );
   }
 }
+

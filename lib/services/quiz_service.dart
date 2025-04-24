@@ -11,12 +11,16 @@ class QuizService {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final List<dynamic> questionsJson = json.decode(response.body);
-        List<Question> list = questionsJson
-            .map((questionJson) => Question.fromJson({
-                  'question': questionJson['question'],
-                  'options': List<String>.from(questionJson['options']),
-                  'answer': questionJson['answer'],
-                }))
+        List<Question> list = questionsJson.map((questionJson) {
+          final List<String> options =
+              List<String>.from(questionJson['options']);
+          return Question.fromJson({
+            'question': questionJson['question'],
+            'options': options,
+            'answer': questionJson['answer'],
+          });
+                
+              }).
             .toList();
         return list;
       } else {
